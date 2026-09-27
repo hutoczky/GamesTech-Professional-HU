@@ -14,7 +14,7 @@ Tervezett GitHub Pages URL:
 
 A kiadások a repository **Releases** részében érhetők el:
 
-- GamesTech HU Professional Unified HUB V2.0.33 R6 — Windows + Linux
+- GamesTech HU Professional Unified HUB V2.0.33 R8 — Studio / CachyOS / Thumbnails — Windows + Linux
 - GamesTech HU Modpack Installer v1.4.0 — Windows + Linux
 
 ## Integritás
@@ -22,6 +22,6 @@ A kiadások a repository **Releases** részében érhetők el:
 SHA-256:
 
 ```text
-2c89acce28ee2879b71811017f2e2811f666daeaaeb125a8d7ecba3bdb16a034  GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.33_R6_WINDOWS_CLICK_AUTODETECT_ELITE_UI_FIX_WINDOWS_LINUX.zip
+cb9c8775ebf1acab644a06a515bdd3d343952342dee0195300291dc12b3a4c9e  GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.33_R8_STUDIO_CACHYOS_THUMBS_WINDOWS_LINUX.zip
 9a30ea005bd2be5725492874c112b37fd471356136f15aebcf2558be4b1ec9ec  GamesTech_HU_Modpack_Installer_v1.4.0_STABILITY_FIX_Windows_Linux.zip
 ```
