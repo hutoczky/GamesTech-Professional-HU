@@ -229,3 +229,81 @@ button, a { -webkit-tap-highlight-color: transparent; }
   }
   .toast { max-width: calc(100vw - 1rem); text-align:center; font-size:.9rem; }
 }
+
+/* Registration / protected access */
+.registration-form { display:grid; gap:.7rem; margin-top:1rem; }
+.registration-form label { color:#bfe8f5; font-size:.9rem; font-weight:700; }
+.registration-form input:not([type="checkbox"]) {
+  width:100%;
+  margin:0;
+  padding:.9rem 1rem;
+  border-radius:10px;
+  border:1px solid rgba(40,210,255,.4);
+  background:#03101c;
+  color:#fff;
+  outline:none;
+}
+.registration-form input:not([type="checkbox"]):focus {
+  border-color:#6de8ff;
+  box-shadow:0 0 0 3px rgba(31,216,255,.10);
+}
+.consent-row {
+  display:flex;
+  align-items:flex-start;
+  gap:.65rem;
+  margin-top:.2rem;
+  font-weight:500 !important;
+  line-height:1.4;
+}
+.consent-row input { margin-top:.2rem; accent-color:#21d5ff; }
+.form-note { margin:.1rem 0 0; color:#759caf; font-size:.78rem; line-height:1.45; }
+.form-error { min-height:1.2em; margin:0; color:#ff9d8b; font-weight:700; font-size:.85rem; }
+.member-status {
+  margin:.75rem 0 1rem;
+  padding:.75rem .9rem;
+  border-radius:10px;
+  font-size:.88rem;
+}
+.member-status.ok {
+  border:1px solid rgba(69,225,184,.32);
+  background:rgba(14,92,72,.18);
+  color:#b8ffe9;
+}
+.member-status.locked {
+  border:1px solid rgba(255,176,46,.28);
+  background:rgba(101,61,5,.17);
+  color:#ffe5b0;
+}
+.member-card {
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+  padding:1rem;
+  margin:.6rem 0 1rem;
+  border:1px solid rgba(49,213,255,.24);
+  border-radius:14px;
+  background:rgba(3,19,33,.72);
+}
+.member-avatar {
+  display:grid;
+  place-items:center;
+  width:3rem;
+  height:3rem;
+  border-radius:50%;
+  border:1px solid rgba(51,218,255,.58);
+  background:radial-gradient(circle at 35% 30%, #154a67, #04111c 72%);
+  color:#9cecff;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.member-card b { display:block; color:#f4fcff; }
+.member-card small { display:block; margin-top:.2rem; color:#7ea9bd; }
+.modal-actions button.protected-link { position:relative; padding-left:2.2rem; }
+.modal-actions button.protected-link::before {
+  content:"🔒";
+  position:absolute;
+  left:.75rem;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:.85rem;
+}
