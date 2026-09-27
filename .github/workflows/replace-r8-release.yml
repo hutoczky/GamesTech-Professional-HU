@@ -39,8 +39,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gh release delete-asset gamestech-hu-v1.0.0 "$OLD_FILE" -y || true
-          gh release upload gamestech-hu-v1.0.0 ".release/$NEW_FILE" --clobber
-          gh release edit gamestech-hu-v1.0.0 \
+          gh release delete-asset gamestech-hu-v1.0.0 "$OLD_FILE" -y --repo "$GITHUB_REPOSITORY" || true
+          gh release upload gamestech-hu-v1.0.0 ".release/$NEW_FILE" --clobber --repo "$GITHUB_REPOSITORY"
+          gh release edit gamestech-hu-v1.0.0 --repo "$GITHUB_REPOSITORY" \
             --title 'GamesTech Professional HU v1.0.0' \
             --notes 'Aktuális kiadás: Professional Unified HUB V2.0.33 R8 (Studio / CachyOS / Thumbnails) és Modpack Installer v1.4.0 Windows/Linux.'
