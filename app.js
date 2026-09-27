@@ -5,7 +5,8 @@
   const HUB_FILE = 'GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.33_R6_WINDOWS_CLICK_AUTODETECT_ELITE_UI_FIX_WINDOWS_LINUX.zip';
   const MODPACK_FILE = 'GamesTech_HU_Modpack_Installer_v1.4.0_STABILITY_FIX_Windows_Linux.zip';
   const RELEASE_PAGE = REPO_URL + '/releases/tag/' + RELEASE_TAG;
-  const MEMBER_KEY = 'gamestech_member_v1';
+  const MEMBER_KEY = 'gamestech_member_v2';
+  const SESSION_KEY = 'gamestech_session_v1';
 
   const modal = document.getElementById('modal');
   const title = document.getElementById('modal-title');
@@ -20,16 +21,31 @@
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
     })[ch]);
 
-  const getMember = () => {
+  const getStoredAccount = () => {
     try {
       const raw = localStorage.getItem(MEMBER_KEY);
       if (!raw) return null;
-      const member = JSON.parse(raw);
-      if (!member?.name || !member?.email) return null;
-      return member;
+      const account = JSON.parse(raw);
+      if (!account?.name || !account?.email || !account?.passwordHash) return null;
+      return account;
     } catch {
       return null;
     }
+  };
+
+  const getMember = () => {
+    const account = getStoredAccount();
+    if (!account) return null;
+    const sessionEmail = sessionStorage.getItem(SESSION_KEY);
+    return sessionEmail === account.email ? account : null;
+  };
+
+  const hashPassword = async (value) => {
+    const bytes = new TextEncoder().encode(value);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
   };
 
   const showToast = (message) => {
@@ -79,7 +95,7 @@
       '</div>';
   };
 
-  const openRegistration = (targetUrl = '') => {
+  const openAccountGateway = (targetUrl = '') => {
     pendingProtectedUrl = targetUrl || '';
     const member = getMember();
 
@@ -90,7 +106,7 @@
           '<div class="member-avatar">GT</div>' +
           '<div><b>' + escapeHtml(member.name) + '</b><small>' + escapeHtml(member.email) + '</small></div>' +
         '</div>' +
-        '<p>A regisztrált hozzáférés aktív ezen az eszközön.</p>',
+        '<p>Be vagy jelentkezve. A védett letöltések és GitHub-hivatkozások elérhetők.</p>',
         (pendingProtectedUrl
           ? '<button type="button" class="primary continue-protected">Folytatás</button>'
           : '') +
@@ -100,18 +116,54 @@
     }
 
     openModal(
-      'Regisztráció szükséges',
-      '<p>A letöltésekhez, a forráskódhoz és a GitHub Release oldalhoz előbb regisztrálj.</p>' +
+      'Csatlakozz a GamesTech közösséghez',
+      '<p>Válaszd a regisztrációt, ha még nincs fiókod, vagy lépj be a meglévő helyi fiókoddal.</p>' +
+      '<div class="auth-choice-grid">' +
+        '<button type="button" class="auth-choice primary-choice" data-auth-choice="register">' +
+          '<span class="auth-choice-icon">✦</span><b>Regisztráció</b><small>Új hozzáférés létrehozása</small>' +
+        '</button>' +
+        '<button type="button" class="auth-choice" data-auth-choice="login">' +
+          '<span class="auth-choice-icon">→</span><b>Belépés</b><small>Meglévő fiók használata</small>' +
+        '</button>' +
+      '</div>',
+      ''
+    );
+  };
+
+  const openRegistration = () => {
+    openModal(
+      'Regisztráció',
+      '<p>Hozd létre a GamesTech hozzáférésedet. Ezután a letöltésekhez, a forráskódhoz és a GitHub Release oldalhoz belépés után férsz hozzá.</p>' +
       '<form id="registration-form" class="registration-form" novalidate>' +
         '<label for="reg-name">Megjelenített név</label>' +
         '<input id="reg-name" name="name" autocomplete="name" minlength="2" maxlength="48" required placeholder="pl. GamesTech">' +
         '<label for="reg-email">E-mail cím</label>' +
         '<input id="reg-email" name="email" type="email" autocomplete="email" maxlength="120" required placeholder="nev@pelda.hu">' +
-        '<label class="consent-row"><input name="consent" type="checkbox" required> <span>Elfogadom, hogy ezen az eszközön a hozzáférési profil eltárolásra kerüljön.</span></label>' +
-        '<p class="form-note">A regisztráció ezen a statikus oldalon helyi hozzáférési profilt hoz létre; jelszót nem kér és nem tárol.</p>' +
+        '<label for="reg-password">Jelszó</label>' +
+        '<input id="reg-password" name="password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required placeholder="Legalább 6 karakter">' +
+        '<label class="consent-row"><input name="consent" type="checkbox" required> <span>Elfogadom, hogy ezen az eszközön a helyi fiókadatok eltárolásra kerüljenek.</span></label>' +
+        '<p class="form-note">A fiók ezen a statikus oldalon helyben tárolódik. A jelszó SHA-256 lenyomatként kerül mentésre, nem olvasható szövegként.</p>' +
         '<p class="form-error" id="registration-error" role="alert"></p>' +
       '</form>',
-      '<button type="submit" form="registration-form" class="primary">Regisztráció és folytatás</button>'
+      '<button type="button" class="back-auth">Vissza</button>' +
+      '<button type="submit" form="registration-form" class="primary">Regisztráció</button>'
+    );
+  };
+
+  const openLogin = () => {
+    openModal(
+      'Belépés',
+      '<p>Lépj be a korábban ezen az eszközön létrehozott GamesTech fiókoddal.</p>' +
+      '<form id="login-form" class="registration-form" novalidate>' +
+        '<label for="login-email">E-mail cím</label>' +
+        '<input id="login-email" name="email" type="email" autocomplete="email" required placeholder="nev@pelda.hu">' +
+        '<label for="login-password">Jelszó</label>' +
+        '<input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="Jelszó">' +
+        '<p class="form-note">Ez a jelenlegi statikus verzió helyi fiókot használ, ezért a belépés azon a böngészőn működik, ahol a regisztráció történt.</p>' +
+        '<p class="form-error" id="login-error" role="alert"></p>' +
+      '</form>',
+      '<button type="button" class="back-auth">Vissza</button>' +
+      '<button type="submit" form="login-form" class="primary">Belépés</button>'
     );
   };
 
@@ -125,7 +177,7 @@
 
   const requireRegistration = (url) => {
     if (!getMember()) {
-      openRegistration(url);
+      openAccountGateway(url);
       return;
     }
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -146,48 +198,103 @@
       return;
     }
 
+    const authChoice = e.target.closest('[data-auth-choice]');
+    if (authChoice) {
+      if (authChoice.dataset.authChoice === 'register') openRegistration();
+      if (authChoice.dataset.authChoice === 'login') openLogin();
+      return;
+    }
+
+    if (e.target.closest('.back-auth')) {
+      openAccountGateway(pendingProtectedUrl);
+      return;
+    }
+
     if (e.target.closest('.logout-member')) {
-      localStorage.removeItem(MEMBER_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
       pendingProtectedUrl = '';
       showToast('Kijelentkezés kész');
-      openRegistration();
+      openAccountGateway();
     }
   });
 
-  modal.addEventListener('submit', (e) => {
-    if (e.target.id !== 'registration-form') return;
-    e.preventDefault();
+  modal.addEventListener('submit', async (e) => {
+    if (e.target.id === 'registration-form') {
+      e.preventDefault();
 
-    const form = e.target;
-    const name = form.elements.name.value.trim();
-    const email = form.elements.email.value.trim().toLowerCase();
-    const consent = form.elements.consent.checked;
-    const error = document.getElementById('registration-error');
+      const form = e.target;
+      const name = form.elements.name.value.trim();
+      const email = form.elements.email.value.trim().toLowerCase();
+      const password = form.elements.password.value;
+      const consent = form.elements.consent.checked;
+      const error = document.getElementById('registration-error');
 
-    if (name.length < 2) {
-      error.textContent = 'Adj meg legalább 2 karakteres nevet.';
+      if (name.length < 2) {
+        error.textContent = 'Adj meg legalább 2 karakteres nevet.';
+        return;
+      }
+      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+        error.textContent = 'Adj meg érvényes e-mail címet.';
+        return;
+      }
+      if (password.length < 6) {
+        error.textContent = 'A jelszó legalább 6 karakter legyen.';
+        return;
+      }
+      if (!consent) {
+        error.textContent = 'A helyi fiók tárolásához szükséges a hozzájárulás.';
+        return;
+      }
+
+      const passwordHash = await hashPassword(password);
+      localStorage.setItem(MEMBER_KEY, JSON.stringify({
+        name,
+        email,
+        passwordHash,
+        registeredAt: new Date().toISOString()
+      }));
+      sessionStorage.setItem(SESSION_KEY, email);
+
+      showToast('Regisztráció és belépés kész');
+      if (pendingProtectedUrl) {
+        continueProtected();
+      } else {
+        openAccountGateway();
+      }
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      error.textContent = 'Adj meg érvényes e-mail címet.';
-      return;
-    }
-    if (!consent) {
-      error.textContent = 'A helyi hozzáférési profil tárolásához szükséges a hozzájárulás.';
-      return;
-    }
 
-    localStorage.setItem(MEMBER_KEY, JSON.stringify({
-      name,
-      email,
-      registeredAt: new Date().toISOString()
-    }));
+    if (e.target.id === 'login-form') {
+      e.preventDefault();
 
-    showToast('Regisztráció kész');
-    if (pendingProtectedUrl) {
-      continueProtected();
-    } else {
-      openRegistration();
+      const form = e.target;
+      const email = form.elements.email.value.trim().toLowerCase();
+      const password = form.elements.password.value;
+      const error = document.getElementById('login-error');
+      const account = getStoredAccount();
+
+      if (!account) {
+        error.textContent = 'Ezen az eszközön még nincs regisztrált fiók.';
+        return;
+      }
+      if (email !== account.email) {
+        error.textContent = 'Az e-mail cím nem egyezik a regisztrált fiókkal.';
+        return;
+      }
+
+      const passwordHash = await hashPassword(password);
+      if (passwordHash !== account.passwordHash) {
+        error.textContent = 'Hibás jelszó.';
+        return;
+      }
+
+      sessionStorage.setItem(SESSION_KEY, account.email);
+      showToast('Sikeres belépés');
+      if (pendingProtectedUrl) {
+        continueProtected();
+      } else {
+        openAccountGateway();
+      }
     }
   });
 
@@ -211,7 +318,7 @@
       (getMember() ? '<div class="member-status ok">✓ Regisztrált hozzáférés aktív.</div>' : '<div class="member-status locked">🔒 Letöltéshez regisztráció szükséges.</div>'),
       downloadActions()
     ),
-    account: () => openRegistration(),
+    account: () => openAccountGateway(),
     community: () => openModal(
       'GamesTech közösség',
       '<p>A projekt külön GitHub-repositoryban él. A forráskód és a kiadások megnyitásához regisztráció szükséges.</p>',
