@@ -48,6 +48,16 @@
       .join('');
   };
 
+  const isValidEmail = (value) => {
+    const email = String(value ?? '').trim();
+    if (!email) return false;
+    const input = document.createElement('input');
+    input.type = 'email';
+    input.required = true;
+    input.value = email;
+    return input.checkValidity();
+  };
+
   const showToast = (message) => {
     toast.textContent = message;
     toast.classList.add('show');
@@ -233,7 +243,7 @@
         error.textContent = 'Adj meg legalább 2 karakteres nevet.';
         return;
       }
-      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+      if (!isValidEmail(email)) {
         error.textContent = 'Adj meg érvényes e-mail címet.';
         return;
       }
@@ -272,6 +282,11 @@
       const password = form.elements.password.value;
       const error = document.getElementById('login-error');
       const account = getStoredAccount();
+
+      if (!isValidEmail(email)) {
+        error.textContent = 'Adj meg érvényes e-mail címet.';
+        return;
+      }
 
       if (!account) {
         error.textContent = 'Ezen az eszközön még nincs regisztrált fiók.';
