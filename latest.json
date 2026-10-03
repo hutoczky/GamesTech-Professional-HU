@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "version": "2.0.34-r10",
+  "file": "GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R10_FILMIC_UPDATER_WINDOWS_LINUX.zip",
+  "url": "https://github.com/hutoczky/GamesTech-Professional-HU/releases/download/gamestech-hu-v1.0.0/GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R10_FILMIC_UPDATER_WINDOWS_LINUX.zip",
+  "sha256": "6aa9e5cc12f7bb4dd513908ad0c505830f58f1384c1f50c370ae0544d6168370",
+  "size": 188882770,
+  "windows_launcher": "GamesTech_HU_Professional_Hub_V2.0.34_Windows_x64.exe",
+  "linux_launcher": "GamesTech_HU_Professional_Hub_V2.0.34_Linux",
+  "notes": "R10: Dune Filmic Archive DLC QA, GamesTech MP4 intro, Windows/Linux one-click updater.",
+  "published": false
+}
