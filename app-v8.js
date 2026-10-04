@@ -116,6 +116,34 @@
     protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true) +
     protectedButton('Modpack Installer letöltése', RELEASE_BASE + MODPACK_FILE);
 
+  const rulesButton = (label = 'Titoktartás és terjesztési szabályok') =>
+    '<button type="button" class="rules-link" data-open-rules>' + escapeHtml(label) + '</button>';
+
+  const rulesBody = () =>
+    '<div class="policy-intro"><b>GamesTech Professional HU – titoktartási és terjesztési szabályok</b>' +
+      '<small>Hatályos: 2026. október 4.</small></div>' +
+    '<div class="policy-section"><h3>1. Engedélyezett használat</h3>' +
+      '<p>A nyilvánosan kiadott GamesTech fordító HUB és fordítási csomagok letölthetők és használhatók saját célra, jogszerűen beszerzett játékpéldánnyal.</p>' +
+      '<p>Másokkal az <b>eredeti GamesTech weboldal vagy hivatalos letöltési oldal linkje</b> szabadon megosztható.</p></div>' +
+    '<div class="policy-section"><h3>2. Terjesztési korlátozások</h3>' +
+      '<p>Írásos engedély nélkül tilos a GamesTech csomagokat más webhelyre, fájlmegosztóra vagy saját letöltési tárhelyre újrafeltölteni, tükrözni, újracsomagolni vagy módosított formában továbbterjeszteni.</p>' +
+      '<p>Tilos a fordítás vagy a telepítő értékesítése, fizetős csomag részeként történő terjesztése, illetve a GamesTech név, logó, szerzői jelölések vagy frissítési információk eltávolítása vagy megtévesztő módosítása.</p></div>' +
+    '<div class="policy-section"><h3>3. Titoktartás – nem nyilvános anyagok</h3>' +
+      '<p>A még nem publikált tesztverziók, előzetes build-ek, privát letöltési linkek, hozzáférési adatok, kulcsok, belső dokumentumok és külön megjelölt tesztanyagok bizalmasak. Ezeket a címzett nem teheti közzé és nem adhatja tovább engedély nélkül.</p>' +
+      '<p>A már nyilvánosan közzétett GamesTech kiadás önmagában nem minősül bizalmas anyagnak; arra a fenti terjesztési szabályok vonatkoznak.</p></div>' +
+    '<div class="policy-section"><h3>4. Módosítás és saját kiadás</h3>' +
+      '<p>Saját módosított változat GamesTech kiadásként nem terjeszthető. Javítási vagy együttműködési javaslat küldhető a projektnek, de a hivatalos kiadás megjelölését csak a GamesTech projekt használhatja.</p></div>' +
+    '<div class="policy-section"><h3>5. Harmadik felek jogai</h3>' +
+      '<p>A játékok, játéknevek, képek és egyéb harmadik féltől származó elemek jogai az eredeti jogosultakat illetik. A GamesTech fordítás nem ad tulajdonjogot az alapjátékhoz vagy annak védett tartalmaihoz.</p></div>' +
+    '<div class="policy-section"><h3>6. Elfogadás</h3>' +
+      '<p>A GamesTech csomag letöltésével vagy használatával a felhasználó tudomásul veszi ezeket a szabályokat. Külön tesztprogram vagy privát hozzáférés esetén további feltételek is érvényesek lehetnek.</p></div>';
+
+  const openRules = () => openModal(
+    'Titoktartás és terjesztési szabályok',
+    rulesBody(),
+    '<button type="button" class="primary" data-close>Rendben</button>'
+  );
+
   const downloadsBody = () => {
     const member = getMember();
     const status = member
@@ -127,6 +155,9 @@
       '<div class="download-grid">' +
         '<div class="download-item"><b>Professional Unified HUB V2.0.34 R14</b><small>Windows + Linux • referenciahű prémium UI • Dune V1.5R2 • egykattintásos frissítés</small></div>' +
         '<div class="download-item"><b>Modpack Installer v1.4.0</b><small>Windows + Linux • stabilitási javítás</small></div>' +
+      '</div>' +
+      '<div class="rules-notice"><span>A letöltéssel elfogadod a GamesTech terjesztési szabályait.</span>' +
+        rulesButton('Szabályok megtekintése') +
       '</div>';
   };
 
@@ -196,7 +227,8 @@
           '<label for="reg-password"><span>Jelszó</span><small>Minimum 6 karakter.</small></label>' +
           '<div class="input-shell"><span class="input-mark">••</span><input id="reg-password" name="password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required placeholder="Legalább 6 karakter"><button class="password-toggle" type="button" data-toggle-password="reg-password" aria-label="Jelszó megjelenítése">Mutat</button></div>' +
         '</div>' +
-        '<label class="consent-card consent-row"><input name="consent" type="checkbox" required><span><b>Helyi profil engedélyezése</b><small>A fiókadatok ezen a böngészőn kerülnek tárolásra.</small></span></label>' +
+        '<label class="consent-card consent-row"><input name="consent" type="checkbox" required><span><b>Helyi profil és felhasználási szabályok elfogadása</b><small>A fiókadatok ezen a böngészőn kerülnek tárolásra, és elfogadod a titoktartási és terjesztési szabályokat.</small></span></label>' +
+        '<div class="rules-inline-wrap">' + rulesButton('Titoktartási és terjesztési szabályok megnyitása') + '</div>' +
         '<div class="local-security-note"><span class="note-dot"></span><p>Ez a GitHub Pages verzió helyi böngészőprofilt használ. A jelszó nem olvasható szövegként kerül mentésre.</p></div>' +
         '<p class="form-error" id="registration-error" role="alert"></p>' +
       '</form>',
@@ -251,6 +283,12 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
   modal.addEventListener('click', (e) => {
+    const rulesLink = e.target.closest('[data-open-rules]');
+    if (rulesLink) {
+      openRules();
+      return;
+    }
+
     const protectedLink = e.target.closest('[data-protected-url]');
     if (protectedLink) {
       requireRegistration(decodeURIComponent(protectedLink.dataset.protectedUrl));
@@ -419,11 +457,13 @@
     community: () => openModal(
       'GamesTech közösség',
       '<p>A GamesTech Professional HU projekt letöltései és frissítései egy helyen érhetők el.</p>',
-      protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true)
+      protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true) +
+      rulesButton('Terjesztési szabályok')
     ),
     support: () => openModal(
-      'Támogatás',
-      '<p>Hibajelzéshez használd a külön GamesTech Professional HU GitHub-projekt Issues felületét.</p>',
+      'Támogatás és szabályok',
+      '<p>Hibajelzéshez használd a GamesTech Professional HU hibajegyfelületét. A fordító HUB használata és továbbadása előtt olvasd el a titoktartási és terjesztési szabályokat.</p>',
+      rulesButton('Titoktartás és terjesztési szabályok') +
       '<a class="primary" href="' + REPO_URL + '/issues" target="_blank" rel="noopener">Hibajegy nyitása</a>'
     ),
     about: () => openModal(
