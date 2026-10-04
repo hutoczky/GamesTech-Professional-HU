@@ -14,7 +14,7 @@ Tervezett GitHub Pages URL:
 
 A kiadások a repository **Releases** részében érhetők el:
 
-- GamesTech HU Professional Unified HUB V2.0.33 R8 — Studio / CachyOS / Thumbnails — Windows + Linux
+- GamesTech HU Professional Unified HUB V2.0.34 R14 — referenciahű prémium UI / Dune V1.5R2 / egykattintásos frissítés — Windows + Linux
 - GamesTech HU Modpack Installer v1.4.0 — Windows + Linux
 
 ## Integritás
@@ -22,6 +22,6 @@ A kiadások a repository **Releases** részében érhetők el:
 SHA-256:
 
 ```text
-cb9c8775ebf1acab644a06a515bdd3d343952342dee0195300291dc12b3a4c9e  GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.33_R8_STUDIO_CACHYOS_THUMBS_WINDOWS_LINUX.zip
+3fb586fe1669a936b6567aed21571cb36c69d4adbfe10f7790df82039b4f994d  GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R14_REFERENCE_MATCH_WINDOWS_LINUX.zip
 9a30ea005bd2be5725492874c112b37fd471356136f15aebcf2558be4b1ec9ec  GamesTech_HU_Modpack_Installer_v1.4.0_STABILITY_FIX_Windows_Linux.zip
 ```
