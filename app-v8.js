@@ -467,10 +467,24 @@
       rulesButton('Terjesztési szabályok')
     ),
     support: () => openModal(
-      'Támogatás és szabályok',
-      '<p>Hibajelzéshez használd a GamesTech Professional HU hibajegyfelületét. A fordító HUB használata és továbbadása előtt olvasd el a titoktartási és terjesztési szabályokat.</p>',
+      'GamesTech támogatása',
+      '<div class="support-card">' +
+        '<div class="support-copy">' +
+          '<span class="auth-kicker">ÖNKÉNTES TÁMOGATÁS</span>' +
+          '<h3>Köszönöm, ha támogatod a GamesTech Professional HU fejlesztését.</h3>' +
+          '<p>A támogatás teljesen önkéntes. A QR-kódot telefonról beolvashatod, vagy megnyithatod közvetlenül a Revolut támogatási linket.</p>' +
+          '<div class="support-revtag">@jozsefywjv</div>' +
+          '<p class="support-note">A Revolut.me hivatkozással Revolut-fiókból vagy támogatott bankkártyával is küldhető támogatás.</p>' +
+        '</div>' +
+        '<a class="support-qr" href="https://revolut.me/jozsefywjv" target="_blank" rel="noopener" aria-label="Revolut támogatás megnyitása">' +
+          '<img src="assets/revolut-support.svg" alt="Revolut támogatási QR-kód – @jozsefywjv">' +
+          '<small>QR-kód beolvasása</small>' +
+        '</a>' +
+      '</div>' +
+      '<div class="support-secondary"><b>Hibát találtál?</b><span>A támogatástól függetlenül továbbra is küldhetsz hibajegyet.</span></div>',
+      '<a class="primary support-pay" href="https://revolut.me/jozsefywjv" target="_blank" rel="noopener">Támogatás Revoluton</a>' +
       rulesButton('Titoktartás és terjesztési szabályok') +
-      '<a class="primary" href="' + REPO_URL + '/issues" target="_blank" rel="noopener">Hibajegy nyitása</a>'
+      '<a href="' + REPO_URL + '/issues" target="_blank" rel="noopener">Hibajegy nyitása</a>'
     ),
     about: () => openModal(
       'GamesTech Professional HU',
