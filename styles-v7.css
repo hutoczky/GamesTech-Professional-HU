@@ -892,3 +892,76 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .top-join.account-active > span { padding: 0 4px !important; }
   .top-join.account-active .login-user-line { display: none !important; }
 }
+
+
+/* =========================================================
+   GamesTech confidentiality / distribution rules
+   ========================================================= */
+.rules-notice {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem;
+  margin-top:.9rem;
+  padding:.75rem .85rem;
+  border:1px solid rgba(255,176,46,.22);
+  border-radius:10px;
+  background:rgba(76,45,5,.12);
+  color:#bcd8e5;
+  font-size:.78rem;
+}
+.rules-link {
+  appearance:none;
+  border:1px solid rgba(67,215,255,.34);
+  border-radius:8px;
+  padding:.52rem .72rem;
+  background:rgba(5,25,40,.78);
+  color:#aeefff;
+  font-weight:800;
+  font-size:.76rem;
+  cursor:pointer;
+}
+.rules-link:hover {
+  border-color:rgba(101,235,255,.68);
+  color:#fff;
+  box-shadow:0 0 18px rgba(31,216,255,.10);
+}
+.rules-inline-wrap {
+  display:flex;
+  justify-content:flex-end;
+  margin-top:-.25rem;
+}
+.policy-intro {
+  display:grid;
+  gap:.25rem;
+  margin-bottom:1rem;
+  padding:.9rem 1rem;
+  border:1px solid rgba(255,176,46,.24);
+  border-radius:12px;
+  background:linear-gradient(180deg,rgba(79,47,6,.16),rgba(7,25,37,.22));
+}
+.policy-intro b { color:#fff4d8; }
+.policy-intro small { color:#7ea7b9; }
+.policy-section {
+  margin:.8rem 0;
+  padding:.85rem .95rem;
+  border:1px solid rgba(55,199,238,.16);
+  border-radius:12px;
+  background:rgba(4,18,30,.58);
+}
+.policy-section h3 {
+  margin:0 0 .45rem;
+  color:#9deeff;
+  font-size:.95rem;
+}
+.policy-section p {
+  margin:.38rem 0;
+  color:#b1d0de;
+  font-size:.86rem;
+  line-height:1.55;
+}
+@media (max-width:560px) {
+  .rules-notice { align-items:flex-start; flex-direction:column; }
+  .rules-inline-wrap { justify-content:stretch; }
+  .rules-inline-wrap .rules-link { width:100%; }
+}
