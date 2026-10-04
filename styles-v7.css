@@ -965,3 +965,95 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .rules-inline-wrap { justify-content:stretch; }
   .rules-inline-wrap .rules-link { width:100%; }
 }
+
+
+/* =========================================================
+   GamesTech voluntary support / Revolut
+   ========================================================= */
+.support-card {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 230px;
+  gap:1.15rem;
+  align-items:center;
+  margin-top:.35rem;
+  padding:1rem;
+  border:1px solid rgba(50,216,255,.22);
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 85% 20%,rgba(45,212,255,.08),transparent 34%),
+    linear-gradient(180deg,rgba(6,27,43,.78),rgba(3,14,24,.88));
+}
+.support-copy h3 {
+  margin:.35rem 0 .7rem;
+  color:#f4fbff;
+  font-size:1.05rem;
+  line-height:1.35;
+}
+.support-copy p {
+  margin:.45rem 0;
+  color:#a8c9d8;
+  font-size:.86rem;
+  line-height:1.55;
+}
+.support-revtag {
+  display:inline-flex;
+  margin:.6rem 0 .25rem;
+  padding:.5rem .72rem;
+  border:1px solid rgba(255,177,45,.46);
+  border-radius:999px;
+  background:rgba(101,61,5,.16);
+  color:#ffe1a0;
+  font-weight:900;
+  letter-spacing:.02em;
+}
+.support-copy .support-note {
+  color:#7da6b8;
+  font-size:.75rem;
+}
+.support-qr {
+  display:grid;
+  justify-items:center;
+  gap:.55rem;
+  padding:.8rem;
+  border:1px solid rgba(73,220,255,.28);
+  border-radius:14px;
+  background:rgba(2,10,18,.86);
+  text-decoration:none;
+}
+.support-qr img {
+  display:block;
+  width:min(100%,190px);
+  aspect-ratio:1;
+  padding:.35rem;
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 0 24px rgba(31,216,255,.08);
+}
+.support-qr small {
+  color:#8eeeff;
+  font-weight:800;
+}
+.support-secondary {
+  display:flex;
+  align-items:center;
+  gap:.65rem;
+  margin-top:.8rem;
+  padding:.7rem .85rem;
+  border-radius:10px;
+  background:rgba(7,27,40,.52);
+  border:1px solid rgba(59,184,220,.12);
+  color:#87aebf;
+  font-size:.78rem;
+}
+.support-secondary b { color:#dceff7; }
+.modal-actions .support-pay {
+  border-color:rgba(255,177,45,.88);
+  background:linear-gradient(180deg,rgba(111,66,4,.92),rgba(58,31,2,.98));
+  color:#fff3d4;
+  box-shadow:0 0 22px rgba(255,145,0,.14);
+}
+@media (max-width:620px) {
+  .support-card { grid-template-columns:1fr; }
+  .support-qr { width:min(100%,260px); justify-self:center; }
+  .support-secondary { align-items:flex-start; flex-direction:column; }
+}
