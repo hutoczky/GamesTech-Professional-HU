@@ -229,7 +229,7 @@
         '</div>' +
         '<label class="consent-card consent-row"><input name="consent" type="checkbox" required><span><b>Helyi profil és felhasználási szabályok elfogadása</b><small>A fiókadatok ezen a böngészőn kerülnek tárolásra, és elfogadod a titoktartási és terjesztési szabályokat.</small></span></label>' +
         '<div class="rules-inline-wrap">' + rulesButton('Titoktartási és terjesztési szabályok megnyitása') + '</div>' +
-        '<div class="local-security-note"><span class="note-dot"></span><p>Ez a GitHub Pages verzió helyi böngészőprofilt használ. A jelszó nem olvasható szövegként kerül mentésre.</p></div>' +
+        '<div class="local-security-note"><span class="note-dot"></span><p>Ez a webes verzió helyi böngészőprofilt használ. A jelszó nem olvasható szövegként kerül mentésre.</p></div>' +
         '<p class="form-error" id="registration-error" role="alert"></p>' +
       '</form>',
       '<button type="button" class="back-auth secondary-action">← Vissza</button>' +
@@ -283,6 +283,12 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
   modal.addEventListener('click', (e) => {
+    const closeLink = e.target.closest('[data-close]');
+    if (closeLink) {
+      closeModal();
+      return;
+    }
+
     const rulesLink = e.target.closest('[data-open-rules]');
     if (rulesLink) {
       openRules();
@@ -470,7 +476,8 @@
       'GamesTech Professional HU',
       '<p>Prémium játékfordítások egy helyen. Ez a weboldal a FormatX/FormatXSuite projekttől teljesen különálló GamesTech projekt.</p>' +
       '<div class="member-status locked">🔒 A Fordító HUB letöltéséhez regisztráció szükséges.</div>',
-      protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true)
+      protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true) +
+      rulesButton('Titoktartás és terjesztési szabályok')
     ),
     screenshots: () => openModal(
       'Képernyőképek',
