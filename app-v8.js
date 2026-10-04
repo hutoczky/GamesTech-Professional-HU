@@ -113,18 +113,17 @@
     escapeHtml(label) + '</button>';
 
   const downloadActions = () =>
-    protectedButton('Professional HUB letöltése', RELEASE_BASE + HUB_FILE, true) +
-    protectedButton('Modpack Installer letöltése', RELEASE_BASE + MODPACK_FILE) +
-    protectedButton('GitHub Release', RELEASE_PAGE);
+    protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true) +
+    protectedButton('Modpack Installer letöltése', RELEASE_BASE + MODPACK_FILE);
 
   const downloadsBody = () => {
     const member = getMember();
     const status = member
       ? '<div class="member-status ok">✓ Regisztrált hozzáférés aktív: <b>' + escapeHtml(member.name) + '</b></div>'
-      : '<div class="member-status locked">🔒 A letöltéshez és a GitHub Release megnyitásához regisztráció szükséges.</div>';
+      : '<div class="member-status locked">🔒 A letöltéshez regisztráció szükséges.</div>';
 
     return status +
-      '<p>A kiadások a különálló GamesTech Professional HU projektből érhetők el.</p>' +
+      '<p>A legújabb GamesTech fordító és telepítő csomagok innen közvetlenül letölthetők.</p>' +
       '<div class="download-grid">' +
         '<div class="download-item"><b>Professional Unified HUB V2.0.34 R14</b><small>Windows + Linux • referenciahű prémium UI • Dune V1.5R2 • egykattintásos frissítés</small></div>' +
         '<div class="download-item"><b>Modpack Installer v1.4.0</b><small>Windows + Linux • stabilitási javítás</small></div>' +
@@ -147,8 +146,8 @@
           '</div>' +
           '<span class="online-pill"><i></i> Bejelentkezve</span>' +
         '</div>' +
-        '<div class="access-strip"><span>✓ Letöltések</span><span>✓ GitHub Release</span><span>✓ Forráskód</span></div>' +
-        '<p class="auth-copy">A hozzáférés aktív ezen a böngészőn. A védett projektfunkciók megnyithatók.</p>',
+        '<div class="access-strip"><span>✓ Fordító HUB</span><span>✓ Letöltések</span><span>✓ Frissítések</span></div>' +
+        '<p class="auth-copy">A hozzáférés aktív ezen a böngészőn. A fordító HUB és a letöltések elérhetők.</p>',
         (pendingProtectedUrl
           ? '<button type="button" class="primary continue-protected">Folytatás</button>'
           : '') +
@@ -182,7 +181,7 @@
       'Regisztráció',
       '<div class="auth-welcome compact">' +
         '<span class="auth-kicker">ÚJ GAMESTECH FIÓK</span>' +
-        '<p>Hozd létre a hozzáférésedet a letöltésekhez, a forráskódhoz és a GitHub Release tartalmakhoz.</p>' +
+        '<p>Hozd létre a hozzáférésedet a GamesTech fordító HUB és a letöltések eléréséhez.</p>' +
       '</div>' +
       '<form id="registration-form" class="registration-form studio-form" novalidate>' +
         '<div class="form-field">' +
@@ -419,9 +418,8 @@
     account: () => openAccountGateway(),
     community: () => openModal(
       'GamesTech közösség',
-      '<p>A projekt külön GitHub-repositoryban él. A forráskód és a kiadások megnyitásához regisztráció szükséges.</p>',
-      protectedButton('GitHub projekt / forráskód', REPO_URL, true) +
-      protectedButton('GitHub Releases', RELEASE_PAGE)
+      '<p>A GamesTech Professional HU projekt letöltései és frissítései egy helyen érhetők el.</p>',
+      protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true)
     ),
     support: () => openModal(
       'Támogatás',
@@ -431,8 +429,8 @@
     about: () => openModal(
       'GamesTech Professional HU',
       '<p>Prémium játékfordítások egy helyen. Ez a weboldal a FormatX/FormatXSuite projekttől teljesen különálló GamesTech projekt.</p>' +
-      '<div class="member-status locked">🔒 A forráskód megnyitása regisztrációhoz kötött.</div>',
-      protectedButton('Forráskód', REPO_URL, true)
+      '<div class="member-status locked">🔒 A Fordító HUB letöltéséhez regisztráció szükséges.</div>',
+      protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true)
     ),
     screenshots: () => openModal(
       'Képernyőképek',
