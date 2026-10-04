@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "version": "2.0.34-r12",
-  "file": "GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R12_DUNE_V1.5R2_ABOUT_UPDATER_WINDOWS_LINUX.zip",
-  "url": "https://github.com/hutoczky/GamesTech-Professional-HU/releases/download/gamestech-hu-v1.0.0/GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R12_DUNE_V1.5R2_ABOUT_UPDATER_WINDOWS_LINUX.zip",
-  "sha256": "74d33c534a167c6dce2703ae9941d713e0fbedccceccc469e15b75200ebe6921",
-  "size": 181100665,
+  "version": "2.0.34-r14",
+  "file": "GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R14_REFERENCE_MATCH_WINDOWS_LINUX.zip",
+  "url": "https://github.com/hutoczky/GamesTech-Professional-HU/releases/download/gamestech-hu-v1.0.0/GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R14_REFERENCE_MATCH_WINDOWS_LINUX.zip",
+  "sha256": "3fb586fe1669a936b6567aed21571cb36c69d4adbfe10f7790df82039b4f994d",
+  "size": 182732246,
   "windows_launcher": "GamesTech_HU_Professional_Hub_V2.0.34_Windows_x64.exe",
   "linux_launcher": "GamesTech_HU_Professional_Hub_V2.0.34_Linux",
-  "notes": "R12: updater integrated under Névjegy; Settings and operation labels separated into clear cards; Dune V1.5R2; Windows/Linux.",
-  "published": false
+  "notes": "R14: referenciahű GamesTech UI, Dune V1.5R2, Windows/Linux, Névjegybe épített egykattintásos frissítő.",
+  "published": true
 }
