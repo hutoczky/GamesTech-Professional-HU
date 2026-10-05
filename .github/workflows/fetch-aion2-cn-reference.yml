@@ -1,0 +1,27 @@
+name: Fetch AION2 CN reference
+
+on:
+  push:
+    branches:
+      - aion2-current-source-research
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download public working AION2 CN files
+        run: |
+          set -euo pipefail
+          mkdir -p ref
+          curl -L --fail --retry 3             'https://raw.githubusercontent.com/duoluoyuji/Aion2-Steam-CN/main/zh/L10NString.dat'             -o ref/L10NString.dat
+          curl -L --fail --retry 3             'https://raw.githubusercontent.com/duoluoyuji/Aion2-Steam-CN/main/zh/pakchunk502000-Windows_0_P.pak'             -o ref/pakchunk502000-Windows_0_P.pak
+          sha256sum ref/*
+          ls -lh ref/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aion2-cn-reference
+          path: ref/
+          retention-days: 1
