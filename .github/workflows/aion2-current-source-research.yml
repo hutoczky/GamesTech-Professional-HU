@@ -1,0 +1,99 @@
+name: AION2 current source research
+
+on:
+  push:
+    branches:
+      - aion2-current-source-research
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download current public English L10N
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3             'https://raw.githubusercontent.com/Holastor/AION-2-Localization/main/L10N/Text/en-US/L10NString.dat'             -o /tmp/L10NString.dat
+          ls -lh /tmp/L10NString.dat
+          sha256sum /tmp/L10NString.dat
+
+      - name: Extract current login/server UI keys
+        run: |
+          python3 - <<'PY'
+          import struct, json, hashlib, re
+          from pathlib import Path
+
+          p=Path('/tmp/L10NString.dat')
+          data=p.read_bytes()
+          out={
+            'size':len(data),
+            'sha256':hashlib.sha256(data).hexdigest(),
+            'header_hex':data[:32].hex(),
+            'format':None,
+            'record_count':None,
+            'parsed_records':0,
+            'entries':{},
+            'errors':[]
+          }
+
+          if len(data)>=14 and struct.unpack_from('<I',data,0)[0]==6 and data[4:10]==b'AION2\x00':
+              out['format']='legacy_plain_v6'
+              count=struct.unpack_from('<I',data,10)[0]
+              out['record_count']=count
+              pos=14
+
+              def readstr(pos):
+                  if pos+4>len(data): raise EOFError('len')
+                  n=struct.unpack_from('<i',data,pos)[0]; pos+=4
+                  if n==0:return '',pos
+                  if n>0:
+                      end=pos+n
+                      if end>len(data):raise EOFError('utf8')
+                      raw=data[pos:end]
+                      if raw.endswith(b'\0'):raw=raw[:-1]
+                      return raw.decode('utf-8','replace'),end
+                  chars=-n; end=pos+chars*2
+                  if end>len(data):raise EOFError('utf16')
+                  raw=data[pos:end]
+                  if raw.endswith(b'\0\0'):raw=raw[:-2]
+                  return raw.decode('utf-16-le','replace'),end
+
+              wanted=re.compile(r'(LOBBY|LOGIN|SERVER|REGION|LANGUAGE|SELECTSERVER|GAMESERVER|TITLE)',re.I)
+              for i in range(count):
+                  try:
+                      k,pos=readstr(pos)
+                      v,pos=readstr(pos)
+                  except Exception as e:
+                      out['errors'].append({'index':i,'error':str(e),'pos':pos})
+                      break
+                  out['parsed_records']+=1
+                  if wanted.search(k):
+                      out['entries'][k]=v
+              out['trailing_bytes']=len(data)-pos
+              out['literal_question_values']=[
+                  {'key':k,'value':v} for k,v in out['entries'].items()
+                  if v.strip() in {'?','??','???','????'}
+              ]
+          else:
+              out['format']='unsupported_or_encrypted'
+
+          Path('research').mkdir(exist_ok=True)
+          Path('research/aion2-current-server-ui.json').write_text(
+              json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({k:out[k] for k in ['size','sha256','format','record_count','parsed_records']},indent=2))
+          print('entries',len(out['entries']))
+          PY
+
+      - name: Commit research result
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/aion2-current-server-ui.json
+          git commit -m 'Research: current AION2 server UI localization source' || exit 0
+          git push origin HEAD:aion2-current-source-research
