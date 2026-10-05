@@ -21,6 +21,11 @@ jobs:
           curl -L --fail --retry 3             'https://raw.githubusercontent.com/Holastor/AION-2-Localization/main/L10N/Text/en-US/L10NString.dat'             -o /tmp/L10NString.dat
           ls -lh /tmp/L10NString.dat
           sha256sum /tmp/L10NString.dat
+          curl -L --fail --retry 3 \
+            'https://raw.githubusercontent.com/duoluoyuji/Aion2-Steam-CN/main/zh/L10NString.dat' \
+            -o /tmp/CN_L10NString.dat
+          ls -lh /tmp/CN_L10NString.dat
+          sha256sum /tmp/CN_L10NString.dat
 
       - name: Extract current screen/server keys
         run: |
@@ -92,6 +97,15 @@ jobs:
           print('selected entries',len(out['entries']))
           print('literal question values',len(out['literal_question_values']))
           PY
+
+      - name: Upload current DAT samples
+        uses: actions/upload-artifact@v4
+        with:
+          name: aion2-current-dat-samples
+          path: |
+            /tmp/L10NString.dat
+            /tmp/CN_L10NString.dat
+          retention-days: 1
 
       - name: Commit research result
         run: |
