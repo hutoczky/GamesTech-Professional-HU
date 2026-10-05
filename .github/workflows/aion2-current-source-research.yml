@@ -22,14 +22,13 @@ jobs:
           ls -lh /tmp/L10NString.dat
           sha256sum /tmp/L10NString.dat
 
-      - name: Extract current login/server UI keys
+      - name: Extract current screen/server keys
         run: |
           python3 - <<'PY'
           import struct, json, hashlib, re
           from pathlib import Path
 
-          p=Path('/tmp/L10NString.dat')
-          data=p.read_bytes()
+          data=Path('/tmp/L10NString.dat').read_bytes()
           out={
             'size':len(data),
             'sha256':hashlib.sha256(data).hexdigest(),
@@ -38,6 +37,7 @@ jobs:
             'record_count':None,
             'parsed_records':0,
             'entries':{},
+            'literal_question_values':[],
             'errors':[]
           }
 
@@ -63,7 +63,12 @@ jobs:
                   if raw.endswith(b'\0\0'):raw=raw[:-2]
                   return raw.decode('utf-16-le','replace'),end
 
-              wanted=re.compile(r'(LOBBY|LOGIN|SERVER|REGION|LANGUAGE|SELECTSERVER|GAMESERVER|TITLE)',re.I)
+              wanted=re.compile(
+                  r'(LOBBY_|GAMESERVER|SELECTSERVER|SERVER_STATE|SERVER_NAME|LOGIN_|STR_LOBBY|'
+                  r'SERVER_ENTER_NO_SELECTED_SERVER|DISCONNECT_SELECT_SERVER|'
+                  r'SETTING_TAB_.*LANGUAGE|SETTING_LANGUAGE)',
+                  re.I
+              )
               for i in range(count):
                   try:
                       k,pos=readstr(pos)
@@ -74,19 +79,18 @@ jobs:
                   out['parsed_records']+=1
                   if wanted.search(k):
                       out['entries'][k]=v
+                  if v.strip() in {'?','??','???','????','?????'}:
+                      out['literal_question_values'].append({'index':i,'key':k,'value':v})
               out['trailing_bytes']=len(data)-pos
-              out['literal_question_values']=[
-                  {'key':k,'value':v} for k,v in out['entries'].items()
-                  if v.strip() in {'?','??','???','????'}
-              ]
           else:
               out['format']='unsupported_or_encrypted'
 
           Path('research').mkdir(exist_ok=True)
-          Path('research/aion2-current-server-ui.json').write_text(
+          Path('research/aion2-current-screen.json').write_text(
               json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
           print(json.dumps({k:out[k] for k in ['size','sha256','format','record_count','parsed_records']},indent=2))
-          print('entries',len(out['entries']))
+          print('selected entries',len(out['entries']))
+          print('literal question values',len(out['literal_question_values']))
           PY
 
       - name: Commit research result
@@ -94,6 +98,6 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research/aion2-current-server-ui.json
-          git commit -m 'Research: current AION2 server UI localization source' || exit 0
+          git add research/aion2-current-screen.json
+          git commit -m 'Research: current AION2 screen localization keys' || exit 0
           git push origin HEAD:aion2-current-source-research
