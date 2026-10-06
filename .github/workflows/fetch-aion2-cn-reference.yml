@@ -88,6 +88,6 @@ jobs:
         with:
           name: aion2-cn-reference
           path: ref/
-          retention-days: 1
+          retention-days: 2
 
 # refreshed 2026-10-06 fourth pass
