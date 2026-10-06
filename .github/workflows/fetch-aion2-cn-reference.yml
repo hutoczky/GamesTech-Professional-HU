@@ -27,13 +27,14 @@ jobs:
               b=p.read_bytes()
               print(p.name, len(b), b[:64].hex(' '))
           PY
+
       - name: Analyze working CN DAT format
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import struct, json, hashlib
 
-          p=Path('ref/L10NString.dat')
+          p=Path('ref/L10NString_current.dat')
           b=p.read_bytes()
           out={
             'size':len(b),
@@ -43,10 +44,8 @@ jobs:
             'u32_0':struct.unpack_from('<I',b,0)[0] if len(b)>=4 else None,
             'ascii_4_10':b[4:10].decode('ascii','replace') if len(b)>=10 else None,
             'u32_10':struct.unpack_from('<I',b,10)[0] if len(b)>=14 else None,
-            'int32_0':struct.unpack_from('<i',b,0)[0] if len(b)>=4 else None,
-            'int32_4':struct.unpack_from('<i',b,4)[0] if len(b)>=8 else None,
           }
-          # Attempt the known public legacy XOR reader after a 14-byte header.
+
           key=bytes([0x25,0xA8,0x7E,0x91])
           def xor(raw): return bytes(x ^ key[i%4] for i,x in enumerate(raw))
           def readstr(pos):
@@ -76,7 +75,6 @@ jobs:
               legacy={'ok':False,'error':repr(e),'pos':locals().get('pos',None)}
           out['legacy_parse']=legacy
 
-          # Exact 11-byte stub contents.
           stub=Path('ref/pakchunk502000-Windows_0_P.pak').read_bytes()
           out['stub_size']=len(stub)
           out['stub_hex']=stub.hex(' ')
@@ -92,12 +90,4 @@ jobs:
           path: ref/
           retention-days: 1
 
-      - name: Commit compact format report
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ref/report.json
-          git commit -m 'Research: analyze working AION2 CN DAT format' || exit 0
-          git push origin HEAD:aion2-current-source-research
-
-# refreshed 2026-10-06 second pass
+# refreshed 2026-10-06 third pass
