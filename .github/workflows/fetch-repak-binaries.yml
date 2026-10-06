@@ -1,0 +1,28 @@
+name: Fetch repak binaries
+
+on:
+  push:
+    branches:
+      - aion2-current-source-research
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download repak v0.2.3 binaries
+        run: |
+          set -euo pipefail
+          mkdir -p out/linux out/windows
+          curl -L --fail --retry 3             'https://github.com/trumank/repak/releases/download/v0.2.3/repak_cli-x86_64-unknown-linux-gnu.tar.xz'             -o /tmp/repak-linux.tar.xz
+          curl -L --fail --retry 3             'https://github.com/trumank/repak/releases/download/v0.2.3/repak_cli-x86_64-pc-windows-msvc.zip'             -o /tmp/repak-windows.zip
+          tar -xJf /tmp/repak-linux.tar.xz -C out/linux
+          unzip -q /tmp/repak-windows.zip -d out/windows
+          find out -type f -maxdepth 4 -print -exec sha256sum {} \;
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repak-v0.2.3-binaries
+          path: out/
+          retention-days: 7
