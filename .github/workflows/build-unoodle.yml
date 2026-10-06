@@ -1,0 +1,28 @@
+name: Build oozextract Linux
+
+on:
+  push:
+    branches:
+      - aion2-current-source-research
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build oozextract CLI
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch dev https://github.com/lvlvllvlvllvlvl/oozextract.git
+          cd oozextract
+          cargo build --release --features cli
+          cp target/release/unoodle /tmp/unoodle
+          chmod +x /tmp/unoodle
+          /tmp/unoodle --help | head -n 40 || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unoodle-linux-x64
+          path: /tmp/unoodle
+          retention-days: 1
