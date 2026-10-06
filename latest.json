@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "version": "2.0.34-r14",
-  "file": "GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R14_REFERENCE_MATCH_WINDOWS_LINUX.zip",
-  "url": "https://github.com/hutoczky/GamesTech-Professional-HU/releases/download/gamestech-hu-v1.0.0/GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R14_REFERENCE_MATCH_WINDOWS_LINUX.zip",
-  "sha256": "3fb586fe1669a936b6567aed21571cb36c69d4adbfe10f7790df82039b4f994d",
-  "size": 182732246,
+  "version": "2.0.34-r14.4",
+  "file": "GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R14.4_WINDOWS_DELAYED_AUTODETECT_HARD_FIX_WINDOWS_LINUX.zip",
+  "url": "https://github.com/hutoczky/GamesTech-Professional-HU/releases/download/gamestech-hu-v1.0.0/GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R14.4_WINDOWS_DELAYED_AUTODETECT_HARD_FIX_WINDOWS_LINUX.zip",
+  "sha256": "c7a8f36e4008606983a5dbceb4c4ba8e304e3daf79427e001469261584af289a",
+  "size": 183979097,
   "windows_launcher": "GamesTech_HU_Professional_Hub_V2.0.34_Windows_x64.exe",
   "linux_launcher": "GamesTech_HU_Professional_Hub_V2.0.34_Linux",
-  "notes": "R14: referenciahű GamesTech UI, Dune V1.5R2, Windows/Linux, Névjegybe épített egykattintásos frissítő.",
+  "notes": "R14.4: Windows késleltetett automatikus felismerés hard fix, referenciahű GamesTech UI, Dune V1.5R2, Windows/Linux, Névjegybe épített egykattintásos frissítő.",
   "published": true
 }
