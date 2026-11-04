@@ -8,6 +8,53 @@
   const MEMBER_KEY = 'gamestech_member_v2';
   const SESSION_KEY = 'gamestech_session_v1';
 
+  // Switch only after GitHub confirms a published, complete release asset.
+  // Until then, the existing public R14.4 ZIP remains downloadable.
+  const R1421_TAG = 'gamestech-hu-r14.21';
+  const R1421_FILE = 'GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R14.21_AUTODETECT_FIX_WINDOWS_LINUX.zip';
+  const R1421_BYTES = 213669956;
+  const stableHubUrl = RELEASE_BASE + HUB_FILE;
+  let activeHubUrl = stableHubUrl;
+  let activeHubTitle = 'Professional Unified HUB V2.0.34 R14.4';
+  let activeHubDescription = 'Windows + Linux • késleltetett Windows automatikus felismerés • hard fix • Dune V1.5R2 • egykattintásos frissítés';
+
+  async function updateHubLinkWhenPublished() {
+    try {
+      const response = await fetch('https://api.github.com/repos/hutoczky/GamesTech-Professional-HU/releases/tags/' + R1421_TAG, {
+        cache: 'no-store',
+        headers: { Accept: 'application/vnd.github+json' }
+      });
+      if (!response.ok) return;
+      const release = await response.json();
+      if (release.draft || release.prerelease) return;
+      const asset = Array.isArray(release.assets) && release.assets.find(entry =>
+        entry.name === R1421_FILE &&
+        entry.size === R1421_BYTES &&
+        entry.state === 'uploaded' &&
+        entry.browser_download_url ===
+          REPO_URL + '/releases/download/' + R1421_TAG + '/' + R1421_FILE
+      );
+      if (!asset) return;
+      activeHubUrl = asset.browser_download_url;
+      activeHubTitle = 'Professional Unified HUB R14.21';
+      activeHubDescription = 'Windows + Linux • javított Steam- és meghajtófelismerés • 14 játékprofil • Nomad Drive FULL';
+
+      document.querySelectorAll('button.protected-link[data-protected-url]').forEach(button => {
+        if (decodeURIComponent(button.dataset.protectedUrl) === stableHubUrl) {
+          button.dataset.protectedUrl = encodeURIComponent(activeHubUrl);
+        }
+      });
+      const visibleTitle = document.querySelector('[data-hub-download-title]');
+      const visibleDescription = document.querySelector('[data-hub-download-description]');
+      if (visibleTitle) visibleTitle.textContent = activeHubTitle;
+      if (visibleDescription) visibleDescription.textContent = activeHubDescription;
+      if (pendingProtectedUrl === stableHubUrl) pendingProtectedUrl = activeHubUrl;
+    } catch {
+      // Failure or no published asset: never point users to a missing ZIP.
+    }
+  }
+  void updateHubLinkWhenPublished();
+
   const modal = document.getElementById('modal');
   const title = document.getElementById('modal-title');
   const body = document.getElementById('modal-body');
@@ -113,7 +160,7 @@
     escapeHtml(label) + '</button>';
 
   const downloadActions = () =>
-    protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true) +
+    protectedButton('Fordító HUB letöltése', activeHubUrl, true) +
     protectedButton('Modpack Installer letöltése', RELEASE_BASE + MODPACK_FILE);
 
   const rulesButton = (label = 'Titoktartás és terjesztési szabályok') =>
@@ -153,7 +200,7 @@
     return status +
       '<p>A legújabb GamesTech fordító és telepítő csomagok innen közvetlenül letölthetők.</p>' +
       '<div class="download-grid">' +
-        '<div class="download-item"><b>Professional Unified HUB V2.0.34 R14.4</b><small>Windows + Linux • késleltetett Windows automatikus felismerés • hard fix • Dune V1.5R2 • egykattintásos frissítés</small></div>' +
+        '<div class="download-item"><b data-hub-download-title>' + escapeHtml(activeHubTitle) + '</b><small data-hub-download-description>' + escapeHtml(activeHubDescription) + '</small></div>' +
         '<div class="download-item"><b>Modpack Installer v1.4.0</b><small>Windows + Linux • stabilitási javítás</small></div>' +
       '</div>' +
       '<div class="rules-notice"><span>A letöltéssel elfogadod a GamesTech terjesztési szabályait.</span>' +
@@ -463,7 +510,7 @@
     community: () => openModal(
       'GamesTech közösség',
       '<p>A GamesTech Professional HU projekt letöltései és frissítései egy helyen érhetők el.</p>',
-      protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true) +
+      protectedButton('Fordító HUB letöltése', activeHubUrl, true) +
       rulesButton('Terjesztési szabályok')
     ),
     support: () => openModal(
@@ -490,7 +537,7 @@
       'GamesTech Professional HU',
       '<p>Prémium játékfordítások egy helyen. Ez a weboldal a FormatX/FormatXSuite projekttől teljesen különálló GamesTech projekt.</p>' +
       '<div class="member-status locked">🔒 A Fordító HUB letöltéséhez regisztráció szükséges.</div>',
-      protectedButton('Fordító HUB letöltése', RELEASE_BASE + HUB_FILE, true) +
+      protectedButton('Fordító HUB letöltése', activeHubUrl, true) +
       rulesButton('Titoktartás és terjesztési szabályok')
     ),
     screenshots: () => openModal(
