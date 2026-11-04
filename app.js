@@ -2,7 +2,7 @@
   const RELEASE_TAG = 'gamestech-hu-v1.0.0';
   const REPO_URL = 'https://github.com/hutoczky/GamesTech-Professional-HU';
   const RELEASE_BASE = REPO_URL + '/releases/download/' + RELEASE_TAG + '/';
-  const HUB_FILE = 'GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.33_R6_WINDOWS_CLICK_AUTODETECT_ELITE_UI_FIX_WINDOWS_LINUX.zip';
+  const HUB_FILE = 'GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R14.4_WINDOWS_DELAYED_AUTODETECT_HARD_FIX_WINDOWS_LINUX.zip';
   const MODPACK_FILE = 'GamesTech_HU_Modpack_Installer_v1.4.0_STABILITY_FIX_Windows_Linux.zip';
   const RELEASE_PAGE = REPO_URL + '/releases/tag/' + RELEASE_TAG;
   const MEMBER_KEY = 'gamestech_member_v2';
@@ -100,7 +100,7 @@
     return status +
       '<p>A kiadások a különálló GamesTech Professional HU projektből érhetők el.</p>' +
       '<div class="download-grid">' +
-        '<div class="download-item"><b>Professional Unified HUB V2.0.33 R6</b><small>Windows + Linux • univerzális játékfordítás-kezelő</small></div>' +
+        '<div class="download-item"><b>Professional Unified HUB V2.0.34 R14.4</b><small>Windows + Linux • univerzális játékfordítás-kezelő</small></div>' +
         '<div class="download-item"><b>Modpack Installer v1.4.0</b><small>Windows + Linux • stabilitási javítás</small></div>' +
       '</div>';
   };
