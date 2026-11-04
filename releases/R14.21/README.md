@@ -5,13 +5,13 @@
 ## Kiadás adatai
 
 - Kiadás: `GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R14.21_AUTODETECT_FIX_WINDOWS_LINUX.zip`
-- Méret: `213665162` bájt
-- SHA-256: `cbeb1f0b0d667c6adac296c69ae7e44a447a62a6b2f11db76769878165a0c3c3`
+- Méret: `213669871` bájt
+- SHA-256: `f612d3bde3bffcc5da42cd46ec540f345bde70a0d76f667a9ae430cddc523045`
 - Támogatás: Windows + Linux/Bazzite, grafikus, dupla kattintásos indítás
 - Játékprofilok: 14 (Nomad Drive FULL V3 – 1307 rekord és a korábbi magyarítások)
 - Javítás: kézi gombnyomásra induló, több Steam-könyvtárat és külső meghajtót kezelő automatikus játékkereső
 - Linux ellenőrzés: 14/14 szintetikus játékprofil PASS, Steam `libraryfolders.vdf`, nem Steam telepítés, demó kizárása, Xvfb felületi gomb → automatikus felismerés PASS
-- Windows: kódellenőrzés készült, natív Windows-gépen történő futtatási teszt még szükséges
+- Windows: külön folyamatban futó kereső (nem blokkolja a WinForms főszálát); natív Windows-gépen történő futtatási teszt még szükséges
 
 ## Közzétételi feltétel
 
