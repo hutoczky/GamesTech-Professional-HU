@@ -1,0 +1,30 @@
+name: Prepare GamesTech R14.21 download release
+on:
+  push:
+    paths:
+      - .github/workflows/prepare-r14-21-release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create draft release without a broken download asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG="gamestech-hu-r14.21"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "R14.21 release already exists."
+            exit 0
+          fi
+          gh release create "$TAG" \
+            --target main \
+            --draft \
+            --title "GamesTech HU Professional HUB R14.21 – Windows + Linux" \
+            --notes "14 játékprofil; teljes Nomad Drive magyarítás; javított automatikus játékkeresés Windows és Linux alatt. A teljes, 213669956 bájtos GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R14.21_AUTODETECT_FIX_WINDOWS_LINUX.zip fájlt csatolni kell a publikálás előtt. Ellenőrzőösszeg (SHA-256): 27865ba99fa96d40549c78edd231f21c5849ef50d17d5e269ef56a8e05623854. Amíg a ZIP nincs feltöltve, a honlap a korábbi stabil letöltést kínálja."
