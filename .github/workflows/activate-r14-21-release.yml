@@ -1,0 +1,70 @@
+name: Activate verified GamesTech R14.21 release
+on:
+  release:
+    types: [published]
+permissions:
+  contents: write
+jobs:
+  activate:
+    if: github.event.release.tag_name == 'gamestech-hu-r14.21'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out GamesTech website
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Validate asset and update latest.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GH_REPO/releases/tags/gamestech-hu-r14.21" > /tmp/gamestech-release.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          release = json.loads(Path('/tmp/gamestech-release.json').read_text(encoding='utf-8'))
+          name = 'GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R14.21_AUTODETECT_FIX_WINDOWS_LINUX.zip'
+          size = 213669956
+          sha = '27865ba99fa96d40549c78edd231f21c5849ef50d17d5e269ef56a8e05623854'
+          url = 'https://github.com/hutoczky/GamesTech-Professional-HU/releases/download/gamestech-hu-r14.21/' + name
+
+          assert not release.get('draft'), 'The release is not published.'
+          matches = [asset for asset in release.get('assets', []) if asset.get('name') == name]
+          assert len(matches) == 1, 'Missing or duplicate R14.21 ZIP.'
+          asset = matches[0]
+          assert asset.get('size') == size, 'Unexpected R14.21 ZIP size.'
+          assert asset.get('state') == 'uploaded', 'Release asset is not ready.'
+          assert asset.get('browser_download_url') == url, 'Unexpected download URL.'
+          if asset.get('digest'):
+              assert asset['digest'] == 'sha256:' + sha, 'SHA256 digest mismatch.'
+
+          target = Path('latest.json')
+          current = json.loads(target.read_text(encoding='utf-8'))
+          current.update({
+              'version': '2.0.34-r14.21',
+              'file': name,
+              'url': url,
+              'sha256': sha,
+              'size': size,
+              'windows_launcher': 'GamesTech_HU_DUPLA_KATT_WINDOWS.exe',
+              'linux_launcher': 'GamesTech_HU_DUPLA_KATT_LINUX',
+              'notes': 'R14.21: grafikus HUB; 14 játékprofil, Nomad Drive FULL; kézi indítású javított Steam játékkeresés Windows/Linux, külső meghajtók.',
+              'published': True
+          })
+          target.write_text(json.dumps(current, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print('PASS: published asset validated and latest.json updated.')
+          PY
+      - name: Commit new current-release metadata
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- latest.json; then
+            echo "latest.json is already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add latest.json
+          git commit -m "release: activate verified R14.21 for self-updater"
+          git push
