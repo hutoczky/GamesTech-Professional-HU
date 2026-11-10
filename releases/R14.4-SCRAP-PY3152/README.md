@@ -2,8 +2,8 @@
 
 ## Csomag (kész, GitHubra még nem feltöltött)
 - Fájlnév: `GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R14.4_SCRAP_GUI_FIX_PY3152_WINDOWS_LINUX.zip`
-- Méret: `184092012` bájt
-- SHA-256: `9fe494d84e18a425b2cd8907886d319564812965e68786992efade82cedee780`
+- Méret: `184092308` bájt
+- SHA-256: `7baf149e545216f7fbff3a9f8e52032caa42c7032359b803137635e667d6ea5e`
 - Alap: a nyilvános **R14.4** Windows/Linux natív grafikus HUB, a meglévő játékprofilok és fordítási adatállományok megőrzésével.
 
 ## Javítás
