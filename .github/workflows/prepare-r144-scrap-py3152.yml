@@ -1,0 +1,26 @@
+name: Prepare R14.4 Scrap HU Python 3.15.2 release
+on:
+  push:
+    paths:
+      - .github/workflows/prepare-r144-scrap-py3152.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a safe draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG="gamestech-hu-r14.4-scrap-py3152"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Draft or published release already exists"
+            exit 0
+          fi
+          gh release create "$TAG" --target main --draft \
+            --title "GamesTech HU HUB R14.4 – Scrap GUI HU + Python 3.15.2" \
+            --notes "The fixed ZIP is ready but must be attached before publication. Filename: GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R14.4_SCRAP_GUI_FIX_PY3152_WINDOWS_LINUX.zip; bytes: 184092012; sha256: 9fe494d84e18a425b2cd8907886d319564812965e68786992efade82cedee780. Scrap Mechanic English and Polish GUI strings from current game files, strict Python 3.15.2, backups and restore. Other game translation payloads unchanged. Windows game integration and multiplayer still require live testing."
