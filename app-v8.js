@@ -8,39 +8,48 @@
   const MEMBER_KEY = 'gamestech_member_v2';
   const SESSION_KEY = 'gamestech_session_v1';
 
-  // Switch only after GitHub confirms a published, complete release asset.
-  // Until then, the existing public R14.4 ZIP remains downloadable.
-  const R1421_TAG = 'gamestech-hu-r14.21';
-  const R1421_FILE = 'GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R14.21_AUTODETECT_FIX_WINDOWS_LINUX.zip';
-  const R1421_BYTES = 213669956;
+  // The published latest.json is the single release pointer.
+  // Keep the last publicly available R14.4 link if verification fails.
   const stableHubUrl = RELEASE_BASE + HUB_FILE;
   let activeHubUrl = stableHubUrl;
   let activeHubTitle = 'Professional Unified HUB V2.0.34 R14.4';
-  let activeHubDescription = 'Windows + Linux • késleltetett Windows automatikus felismerés • hard fix • Dune V1.5R2 • egykattintásos frissítés';
+  let activeHubDescription = 'Windows + Linux • korábbi stabil GamesTech HUB letöltés';
 
   async function updateHubLinkWhenPublished() {
     try {
-      const response = await fetch('https://api.github.com/repos/hutoczky/GamesTech-Professional-HU/releases/tags/' + R1421_TAG, {
-        cache: 'no-store',
-        headers: { Accept: 'application/vnd.github+json' }
-      });
+      const metadataResponse = await fetch('./latest.json', { cache: 'no-store' });
+      if (!metadataResponse.ok) return;
+      const latest = await metadataResponse.json();
+      if (latest.published !== true ||
+          !latest.file || !latest.url || !Number.isSafeInteger(latest.size) ||
+          !/^[a-f0-9]{64}$/i.test(latest.sha256 || '')) return;
+
+      const download = new URL(latest.url);
+      if (download.origin !== 'https://github.com') return;
+      const match = download.pathname.match(/^\/hutoczky\/GamesTech-Professional-HU\/releases\/download\/([^/]+)\/([^/]+)$/);
+      if (!match || decodeURIComponent(match[2]) !== latest.file) return;
+
+      const api = 'https://api.github.com/repos/hutoczky/GamesTech-Professional-HU/releases/tags/' +
+        encodeURIComponent(decodeURIComponent(match[1]));
+      const response = await fetch(api, { cache: 'no-store', headers: { Accept: 'application/vnd.github+json' } });
       if (!response.ok) return;
       const release = await response.json();
       if (release.draft || release.prerelease) return;
       const asset = Array.isArray(release.assets) && release.assets.find(entry =>
-        entry.name === R1421_FILE &&
-        entry.size === R1421_BYTES &&
-        entry.state === 'uploaded' &&
-        entry.browser_download_url ===
-          REPO_URL + '/releases/download/' + R1421_TAG + '/' + R1421_FILE
+        entry.name === latest.file && entry.size === latest.size &&
+        entry.state === 'uploaded' && entry.browser_download_url === latest.url &&
+        (!entry.digest || entry.digest === 'sha256:' + latest.sha256.toLowerCase())
       );
       if (!asset) return;
-      activeHubUrl = asset.browser_download_url;
-      activeHubTitle = 'Professional Unified HUB R14.21';
-      activeHubDescription = 'Windows + Linux • javított Steam- és meghajtófelismerés • 14 játékprofil • Nomad Drive FULL';
 
+      const previous = activeHubUrl;
+      activeHubUrl = latest.url;
+      activeHubTitle = (latest.version || '').includes('all-backends')
+        ? 'Professional Unified HUB R14.4 – All Backends Fix'
+        : 'Professional Unified HUB ' + (latest.version || '– aktuális kiadás');
+      activeHubDescription = String(latest.notes || 'Windows + Linux • grafikus GamesTech fordító').slice(0, 240);
       document.querySelectorAll('button.protected-link[data-protected-url]').forEach(button => {
-        if (decodeURIComponent(button.dataset.protectedUrl) === stableHubUrl) {
+        if (decodeURIComponent(button.dataset.protectedUrl) === previous) {
           button.dataset.protectedUrl = encodeURIComponent(activeHubUrl);
         }
       });
@@ -48,9 +57,9 @@
       const visibleDescription = document.querySelector('[data-hub-download-description]');
       if (visibleTitle) visibleTitle.textContent = activeHubTitle;
       if (visibleDescription) visibleDescription.textContent = activeHubDescription;
-      if (pendingProtectedUrl === stableHubUrl) pendingProtectedUrl = activeHubUrl;
+      if (pendingProtectedUrl === previous) pendingProtectedUrl = activeHubUrl;
     } catch {
-      // Failure or no published asset: never point users to a missing ZIP.
+      // No verifiable released asset: keep the stable public ZIP.
     }
   }
   void updateHubLinkWhenPublished();
