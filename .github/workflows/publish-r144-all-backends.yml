@@ -1,0 +1,79 @@
+name: Publish verified R14.4 All Backends Fix
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamestech-publish-r144-all-backends
+  cancel-in-progress: false
+
+jobs:
+  verify-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out current website
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Verify complete ZIP and publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG='gamestech-hu-r14.4-all-backends-fix'
+          FILE='GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R14.4_ALL_BACKENDS_FIX_SCRAP_NOMAD_SUB2_EXPERIMENTAL_WINDOWS_LINUX.zip'
+          SHA='d3f0aaeb5fc966200a9b523f99ae7ead489d2de51d83d1e79b7cc5ef51223dd9'
+          SIZE='203436939'
+          URL="https://github.com/$GH_REPO/releases/download/$TAG/$FILE"
+
+          echo '=== Check draft release ==='
+          gh api "repos/$GH_REPO/releases/tags/$TAG" > "$RUNNER_TEMP/release.json"
+          jq -e --arg file "$FILE" --argjson size "$SIZE" '
+            .draft == true and
+            ([.assets[]? | select(.name == $file and .size == $size and .state == "uploaded")] | length == 1)
+          ' "$RUNNER_TEMP/release.json"
+
+          echo '=== Download attachment from draft release ==='
+          mkdir -p "$RUNNER_TEMP/package"
+          gh release download "$TAG" --pattern "$FILE" --dir "$RUNNER_TEMP/package" --clobber
+          ZIP="$RUNNER_TEMP/package/$FILE"
+          test -s "$ZIP"
+          test "$(stat -c '%s' "$ZIP")" = "$SIZE"
+
+          echo '=== Verify SHA-256 and ZIP integrity ==='
+          echo "$SHA  $ZIP" | sha256sum -c -
+          unzip -tqq "$ZIP"
+          unzip -Z -1 "$ZIP" | grep -q '/GamesTech_HU_DUPLA_KATT_LINUX$'
+          unzip -Z -1 "$ZIP" | grep -q '/GamesTech_HU_DUPLA_KATT_WINDOWS.exe$'
+
+          echo '=== Activate only the verified package ==='
+          jq --arg version '2.0.34-r14.4-all-backends-20261117' \
+             --arg file "$FILE" --arg url "$URL" --arg sha "$SHA" \
+             --argjson size "$SIZE" '
+            .version=$version |
+            .file=$file |
+            .url=$url |
+            .sha256=$sha |
+            .size=$size |
+            .windows_launcher="GamesTech_HU_DUPLA_KATT_WINDOWS.exe" |
+            .linux_launcher="GamesTech_HU_DUPLA_KATT_LINUX" |
+            .notes="All Backends Fix: Scrap Mechanic AutoRepair, Nomad Drive V3, Subnautica 2 Experimental, javított Windows/Linux telepítőirányítás; Python 3.15.2." |
+            .published=true
+          ' latest.json > latest.json.tmp
+          mv latest.json.tmp latest.json
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'release: activate verified R14.4 All Backends Fix'
+            git push
+          fi
+
+          gh release edit "$TAG" --draft=false
+          echo "PASS: published release and verified update metadata"
