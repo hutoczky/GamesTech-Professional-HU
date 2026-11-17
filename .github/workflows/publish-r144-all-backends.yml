@@ -48,8 +48,65 @@ jobs:
           echo '=== Verify SHA-256 and ZIP integrity ==='
           echo "$SHA  $ZIP" | sha256sum -c -
           unzip -tqq "$ZIP"
-          unzip -Z -1 "$ZIP" | grep -q '/GamesTech_HU_DUPLA_KATT_LINUX$'
-          unzip -Z -1 "$ZIP" | grep -q '/GamesTech_HU_DUPLA_KATT_WINDOWS.exe$'
+          unzip -Z -1 "$ZIP" > "$RUNNER_TEMP/gamestech-files.txt"
+          grep -q '/GamesTech_HU_DUPLA_KATT_LINUX
+
+          echo '=== Activate only the verified package ==='
+          jq --arg version '2.0.34-r14.4-all-backends-20261117' \
+             --arg file "$FILE" --arg url "$URL" --arg sha "$SHA" \
+             --argjson size "$SIZE" '
+            .version=$version |
+            .file=$file |
+            .url=$url |
+            .sha256=$sha |
+            .size=$size |
+            .windows_launcher="GamesTech_HU_DUPLA_KATT_WINDOWS.exe" |
+            .linux_launcher="GamesTech_HU_DUPLA_KATT_LINUX" |
+            .notes="All Backends Fix: Scrap Mechanic AutoRepair, Nomad Drive V3, Subnautica 2 Experimental, javított Windows/Linux telepítőirányítás; Python 3.15.2." |
+            .published=true
+          ' latest.json > latest.json.tmp
+          mv latest.json.tmp latest.json
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'release: activate verified R14.4 All Backends Fix'
+            git push
+          fi
+
+          gh release edit "$TAG" --draft=false
+          echo "PASS: published release and verified update metadata"
+ "$RUNNER_TEMP/gamestech-files.txt"
+          grep -q '/GamesTech_HU_DUPLA_KATT_WINDOWS.exe
+
+          echo '=== Activate only the verified package ==='
+          jq --arg version '2.0.34-r14.4-all-backends-20261117' \
+             --arg file "$FILE" --arg url "$URL" --arg sha "$SHA" \
+             --argjson size "$SIZE" '
+            .version=$version |
+            .file=$file |
+            .url=$url |
+            .sha256=$sha |
+            .size=$size |
+            .windows_launcher="GamesTech_HU_DUPLA_KATT_WINDOWS.exe" |
+            .linux_launcher="GamesTech_HU_DUPLA_KATT_LINUX" |
+            .notes="All Backends Fix: Scrap Mechanic AutoRepair, Nomad Drive V3, Subnautica 2 Experimental, javított Windows/Linux telepítőirányítás; Python 3.15.2." |
+            .published=true
+          ' latest.json > latest.json.tmp
+          mv latest.json.tmp latest.json
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'release: activate verified R14.4 All Backends Fix'
+            git push
+          fi
+
+          gh release edit "$TAG" --draft=false
+          echo "PASS: published release and verified update metadata"
+ "$RUNNER_TEMP/gamestech-files.txt"
 
           echo '=== Activate only the verified package ==='
           jq --arg version '2.0.34-r14.4-all-backends-20261117' \
