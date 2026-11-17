@@ -1,0 +1,30 @@
+name: Prepare R14.4 All Backends Fix release
+on:
+  push:
+    paths:
+      - .github/workflows/prepare-r144-all-backends.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create dedicated draft release (no broken public link)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG="gamestech-hu-r14.4-all-backends-fix"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release already exists; not overwriting it."
+            exit 0
+          fi
+          gh release create "$TAG" \
+            --target main \
+            --draft \
+            --title "GamesTech HU HUB R14.4 – ALL BACKENDS FIX (Windows + Linux)" \
+            --notes "Javított grafikus GamesTech HUB: közös backendvezérlés Windows/Linux, Scrap Mechanic AutoRepair, Nomad Drive V3, Subnautica 2 Experimental és Python 3.15.2. A teljes ZIP feltöltés után külön GitHub Actions ellenőrzéssel publikálható. A ZIP neve: GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R14.4_ALL_BACKENDS_FIX_SCRAP_NOMAD_SUB2_EXPERIMENTAL_WINDOWS_LINUX.zip. Méret: 203436939 bájt. SHA-256: d3f0aaeb5fc966200a9b523f99ae7ead489d2de51d83d1e79b7cc5ef51223dd9. Teszt: ZIP PASS; Windows natív játékpróba nem igazolt."
