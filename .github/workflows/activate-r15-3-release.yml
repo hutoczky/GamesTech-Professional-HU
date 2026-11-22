@@ -1,0 +1,110 @@
+name: Activate verified GamesTech R15.3 release
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamestech-r153-activation
+  cancel-in-progress: false
+
+jobs:
+  activate:
+    if: github.event_name == 'workflow_dispatch' || github.event.release.tag_name == 'gamestech-hu-r15.3'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GamesTech website
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Verify R15.3 release asset and update public download
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG='gamestech-hu-r15.3'
+          FILE='GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R15.3_MAIN_SEQUENCE_IOSTORE_FIX_WINDOWS_LINUX.zip'
+          SIZE='193351780'
+          SHA='000fa66856766bf8257753080409aa13beb6a27e325baa9497ad4459eaf5efd7'
+          URL="https://github.com/$GH_REPO/releases/download/$TAG/$FILE"
+
+          gh api "repos/$GH_REPO/releases/tags/$TAG" > "$RUNNER_TEMP/gamestech-r153-release.json"
+          jq -e --arg name "$FILE" --argjson size "$SIZE" --arg url "$URL" --arg sha "$SHA" '
+            (.draft == false) and (.prerelease == false) and
+            ([.assets[]? | select(
+              (.name == $name) and (.size == $size) and
+              (.state == "uploaded") and (.browser_download_url == $url) and
+              ((.digest == null) or (.digest == ("sha256:" + $sha)))
+            )] | length == 1)
+          ' "$RUNNER_TEMP/gamestech-r153-release.json"
+
+          mkdir -p "$RUNNER_TEMP/gamestech-package"
+          gh release download "$TAG" --repo "$GH_REPO" --pattern "$FILE" --dir "$RUNNER_TEMP/gamestech-package" --clobber
+          ZIP="$RUNNER_TEMP/gamestech-package/$FILE"
+          test "$(stat -c '%s' "$ZIP")" = "$SIZE"
+          printf '%s  %s\n' "$SHA" "$ZIP" | sha256sum -c -
+          unzip -tqq "$ZIP"
+          unzip -Z -1 "$ZIP" > "$RUNNER_TEMP/r153-files.txt"
+          grep -q '/GamesTech_HU_DUPLA_KATT_WINDOWS.exe$' "$RUNNER_TEMP/r153-files.txt"
+          grep -q '/GamesTech_HU_DUPLA_KATT_LINUX$' "$RUNNER_TEMP/r153-files.txt"
+          grep -q '/R15.3_QA_REPORT.json$' "$RUNNER_TEMP/r153-files.txt"
+
+          jq --arg file "$FILE" --arg url "$URL" --arg sha "$SHA" --argjson size "$SIZE" '
+            .version = "2.0.34-r15.3" |
+            .file = $file |
+            .url = $url |
+            .sha256 = $sha |
+            .size = $size |
+            .windows_launcher = "GamesTech_HU_DUPLA_KATT_WINDOWS.exe" |
+            .linux_launcher = "GamesTech_HU_DUPLA_KATT_LINUX" |
+            .notes = "R15.3: Main Sequence Demo magyar főmenü a felhasználói képen igazolva; IoStore/PAK javítás, automatikus keresés Windows és Linux alatt, 14 játékprofil. A teljes játék magyarítása és a Windows-futtatás nem igazolt." |
+            .published = true
+          ' latest.json > latest.json.tmp
+          mv latest.json.tmp latest.json
+
+          export GAMESTECH_R153_URL="$URL" GAMESTECH_R153_FILE="$FILE" GAMESTECH_R153_SHA="$SHA"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          path = Path("README.md")
+          content = path.read_text(encoding="utf-8")
+          lines = content.splitlines()
+          version_link = (
+              "- [GamesTech HU Professional Unified HUB R15.3]("
+              + os.environ["GAMESTECH_R153_URL"] + ")"
+              + " — Main Sequence Demo magyar főmenü, IoStore kompatibilitás, automatikus felismerés — Windows + Linux"
+          )
+          filename = os.environ["GAMESTECH_R153_FILE"]
+          digest = os.environ["GAMESTECH_R153_SHA"]
+          replacement = digest + "  " + filename
+          found_link = False
+          found_hash = False
+          for i, line in enumerate(lines):
+              if line.startswith("- [GamesTech HU Professional Unified HUB "):
+                  lines[i] = version_link
+                  found_link = True
+              if line.startswith("c7a8f36e4008606983a5dbceb4c4ba8e304e3daf79427e001469261584af289a  GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_") or (
+                  len(line) >= 64 and "  GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_" in line
+              ):
+                  lines[i] = replacement
+                  found_hash = True
+          if not found_link or not found_hash:
+              raise SystemExit("README expected HUB link/checksum missing; activation stopped")
+          path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add latest.json README.md
+          if ! git diff --cached --quiet; then
+            git commit -m 'release: activate verified GamesTech HUB R15.3'
+            git push origin HEAD:main
+          fi
+
+          echo 'PASS: R15.3 published asset verified and latest.json updated'
