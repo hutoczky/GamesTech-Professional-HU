@@ -1,0 +1,114 @@
+name: Activate verified GamesTech R15.1 release
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamestech-release-r151-activation
+  cancel-in-progress: false
+
+jobs:
+  activate:
+    if: github.event_name == 'workflow_dispatch' || github.event.release.tag_name == 'gamestech-hu-r15.1'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current GamesTech website
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Verify public ZIP and publish current version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG='gamestech-hu-r15.1'
+          FILE='GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R15.1_MAIN_SEQUENCE_AUTO_FIX_WINDOWS_LINUX.zip'
+          SIZE='193346029'
+          SHA='18b8069f6c49dbf764153ea610cfd9c6eeb80b291179fd9ba00fbd9aae5b4f36'
+          URL="https://github.com/$GH_REPO/releases/download/$TAG/$FILE"
+
+          gh api "repos/$GH_REPO/releases/tags/$TAG" > "$RUNNER_TEMP/release-r151.json"
+          jq -e --arg name "$FILE" --argjson size "$SIZE" --arg url "$URL" --arg sha "$SHA" '
+            .draft == false and .prerelease == false and
+            ([.assets[]? | select(
+              .name == $name and .size == $size and .state == "uploaded" and
+              .browser_download_url == $url and
+              ((.digest == null) or (.digest == ("sha256:" + $sha)))
+            )] | length == 1)
+          ' "$RUNNER_TEMP/release-r151.json"
+
+          mkdir -p "$RUNNER_TEMP/package"
+          gh release download "$TAG" --pattern "$FILE" --dir "$RUNNER_TEMP/package" --clobber
+          ZIP="$RUNNER_TEMP/package/$FILE"
+          test -s "$ZIP"
+          test "$(stat -c '%s' "$ZIP")" = "$SIZE"
+          echo "$SHA  $ZIP" | sha256sum --check --status
+          unzip -tqq "$ZIP"
+          unzip -Z -1 "$ZIP" > "$RUNNER_TEMP/r151-files.txt"
+          grep -q '/GamesTech_HU_DUPLA_KATT_LINUX$' "$RUNNER_TEMP/r151-files.txt"
+          grep -q '/GamesTech_HU_DUPLA_KATT_WINDOWS.exe$' "$RUNNER_TEMP/r151-files.txt"
+          grep -q '/R15.1_QA_REPORT.json$' "$RUNNER_TEMP/r151-files.txt"
+
+          export R151_TAG="$TAG" R151_FILE="$FILE" R151_SIZE="$SIZE" R151_SHA="$SHA" R151_URL="$URL"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          manifest = Path("latest.json")
+          latest = json.loads(manifest.read_text(encoding="utf-8"))
+          latest.update({
+              "version": "2.0.34-r15.1",
+              "file": os.environ["R151_FILE"],
+              "url": os.environ["R151_URL"],
+              "sha256": os.environ["R151_SHA"],
+              "size": int(os.environ["R151_SIZE"]),
+              "windows_launcher": "GamesTech_HU_DUPLA_KATT_WINDOWS.exe",
+              "linux_launcher": "GamesTech_HU_DUPLA_KATT_LINUX",
+              "notes": "R15.1: Main Sequence Demo Steam/common, steamapps, SteamLibrary és Paks mappafelismerés javítva Windows/Linux; 14 játékprofil megőrizve. A játékbeli működés és a natív Windows-futtatás külön tesztelendő.",
+              "published": True,
+          })
+          manifest.write_text(json.dumps(latest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+          readme = Path("README.md")
+          content = readme.read_text(encoding="utf-8")
+          download_line = (
+              "- [GamesTech HU Professional Unified HUB R15.1]("
+              + os.environ["R151_URL"]
+              + ") — Main Sequence Demo automatikus Steam-mappafelismerés javítás, egységes GamesTech GUI, 14 játékprofil — Windows + Linux"
+          )
+          lines = content.splitlines()
+          for i, line in enumerate(lines):
+              if line.startswith("- [GamesTech HU Professional Unified HUB"):
+                  lines[i] = download_line
+                  break
+          else:
+              raise RuntimeError("README HUB download entry was not found; refusing partial activation")
+          old = "c7a8f36e4008606983a5dbceb4c4ba8e304e3daf79427e001469261584af289a  GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_V2.0.34_R14.4_WINDOWS_DELAYED_AUTODETECT_HARD_FIX_WINDOWS_LINUX.zip"
+          new = os.environ["R151_SHA"] + "  " + os.environ["R151_FILE"]
+          replaced = False
+          for i, line in enumerate(lines):
+              if line == old:
+                  lines[i] = new
+                  replaced = True
+                  break
+          if not replaced and new not in lines:
+              raise RuntimeError("README expected R14.4 checksum was not found; refusing partial activation")
+          readme.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add latest.json README.md
+          if ! git diff --cached --quiet; then
+            git commit -m 'release: switch GamesTech website and self-updater to verified R15.1'
+            git push origin HEAD:main
+          fi
+          echo "PASS: R15.1 asset verified and current release metadata published"
