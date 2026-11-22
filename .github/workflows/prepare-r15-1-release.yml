@@ -16,7 +16,7 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
-      - name: Create R15.1 draft (never switch downloads before asset verification)
+      - name: Create R15.1 draft release safely
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -28,21 +28,12 @@ jobs:
           SHA='18b8069f6c49dbf764153ea610cfd9c6eeb80b291179fd9ba00fbd9aae5b4f36'
 
           if gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
-            echo "R15.1 release exists; leaving it unchanged."
+            echo "R15.1 draft already exists; no changes."
             exit 0
           fi
 
           gh release create "$TAG" --repo "$GH_REPO" --target main --draft \
             --title 'GamesTech HU Professional HUB R15.1 – Windows + Linux' \
-            --notes "Main Sequence Demo: automatikus Steam/common, steamapps, SteamLibrary és Paks feloldás; 14 játékprofil és magyarítások megtartva.
+            --notes "Main Sequence Demo Steam/common, SteamLibrary, Paks automatikus felismerés javítása; 14 játékprofil megőrizve. A teljes ZIP csatolandó feltöltés után, publikálás előtt méret és SHA-256 ellenőrzése szükséges. Fájl: $FILE; méret: $SIZE bájt; SHA-256: $SHA. Linux szintetikus teszt PASS; Windows és játékbeli teszt még nincs."
 
-A teljes ZIP fájl GitHub Release assetként feltöltendő, csak utána szabad publikálni.
-
-Fájlnév: $FILE
-Méret: $SIZE bájt
-SHA-256: $SHA
-
-A Linux kereső és grafikus indítás szintetikus teszteken megfelelt. A tényleges Windows-futtatás és játékbeli magyarítás még nem igazolt.
-A jelenlegi honlap-letöltés a sikeres közzétételig változatlan marad."
-
-          echo "PASS: R15.1 draft created, without changing current download link"
+          echo "PASS: R15.1 draft created. Current website download not modified."
