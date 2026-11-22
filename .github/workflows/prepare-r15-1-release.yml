@@ -1,0 +1,48 @@
+name: Prepare GamesTech R15.1 release
+on:
+  push:
+    paths:
+      - .github/workflows/prepare-r15-1-release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamestech-r151-draft-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create R15.1 draft (never switch downloads before asset verification)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG='gamestech-hu-r15.1'
+          FILE='GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R15.1_MAIN_SEQUENCE_AUTO_FIX_WINDOWS_LINUX.zip'
+          SIZE='193346029'
+          SHA='18b8069f6c49dbf764153ea610cfd9c6eeb80b291179fd9ba00fbd9aae5b4f36'
+
+          if gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
+            echo "R15.1 release exists; leaving it unchanged."
+            exit 0
+          fi
+
+          gh release create "$TAG" --repo "$GH_REPO" --target main --draft \
+            --title 'GamesTech HU Professional HUB R15.1 – Windows + Linux' \
+            --notes "Main Sequence Demo: automatikus Steam/common, steamapps, SteamLibrary és Paks feloldás; 14 játékprofil és magyarítások megtartva.
+
+A teljes ZIP fájl GitHub Release assetként feltöltendő, csak utána szabad publikálni.
+
+Fájlnév: $FILE
+Méret: $SIZE bájt
+SHA-256: $SHA
+
+A Linux kereső és grafikus indítás szintetikus teszteken megfelelt. A tényleges Windows-futtatás és játékbeli magyarítás még nem igazolt.
+A jelenlegi honlap-letöltés a sikeres közzétételig változatlan marad."
+
+          echo "PASS: R15.1 draft created, without changing current download link"
