@@ -80,7 +80,14 @@ fi
 echo 'Ellenőrzött ZIP feltöltése a GitHub Releases tárhelyre...'
 gh release upload "$TAG" "$ZIP" --clobber --repo "$REPO"
 
-ASSET_SIZE="$(gh api "repos/$REPO/releases/tags/$TAG" \
+RELEASE_ID="$(gh api "repos/$REPO/releases?per_page=100" \
+  --jq '.[] | select(.tag_name == "gamestech-hu-r15.1") | .id')"
+if [[ ! "$RELEASE_ID" =~ ^[0-9]+$ ]]; then
+  echo 'HIBA: Az R15.1 kiadás azonosítója nem található.'
+  exit 5
+fi
+
+ASSET_SIZE="$(gh api "repos/$REPO/releases/$RELEASE_ID" \
   --jq '.assets[] | select(.name == "GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R15.1_MAIN_SEQUENCE_AUTO_FIX_WINDOWS_LINUX.zip") | .size')"
 if [[ "$ASSET_SIZE" != "$EXPECTED_SIZE" ]]; then
   echo "HIBA: GitHub feltöltésméret eltérés: $ASSET_SIZE"
@@ -88,7 +95,7 @@ if [[ "$ASSET_SIZE" != "$EXPECTED_SIZE" ]]; then
   exit 5
 fi
 
-ASSET_DIGEST="$(gh api "repos/$REPO/releases/tags/$TAG" \
+ASSET_DIGEST="$(gh api "repos/$REPO/releases/$RELEASE_ID" \
   --jq '.assets[] | select(.name == "GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R15.1_MAIN_SEQUENCE_AUTO_FIX_WINDOWS_LINUX.zip") | (.digest // "")')"
 if [[ -n "$ASSET_DIGEST" && "$ASSET_DIGEST" != "sha256:$EXPECTED_SHA" ]]; then
   echo "HIBA: GitHub SHA-256 digest eltérés: $ASSET_DIGEST"
