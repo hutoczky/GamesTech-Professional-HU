@@ -1,0 +1,48 @@
+name: Prepare GamesTech R15.3 verified release
+on:
+  push:
+    paths:
+      - .github/workflows/prepare-r15-3-release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamestech-r153-prepare
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create draft release, keep current website live
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG='gamestech-hu-r15.3'
+          FILE='GamesTech_HU_PROFESSIONAL_UNIFIED_HUB_R15.3_MAIN_SEQUENCE_IOSTORE_FIX_WINDOWS_LINUX.zip'
+          SIZE='193351780'
+          SHA='000fa66856766bf8257753080409aa13beb6a27e325baa9497ad4459eaf5efd7'
+
+          if gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
+            echo "R15.3 release exists. No overwrite."
+            exit 0
+          fi
+
+          gh release create "$TAG" \
+            --repo "$GH_REPO" \
+            --target main \
+            --draft \
+            --title 'GamesTech HU Professional HUB R15.3 – Main Sequence magyarítás – Windows + Linux' \
+            --notes "Main Sequence Demo: a magyar főmenü megjelenése felhasználói képpel igazolt. A R15.3 PAK/IoStore kompatibilitási csomag az eredeti játékfájlokat nem írja felül. További 13 játékprofil megtartva. A teljes játékfordítás és a natív Windows-futtatás külön tesztelendő.
+
+ZIP: $FILE
+Méret: $SIZE bájt
+SHA-256: $SHA
+
+A kiadás egyelőre vázlat. Az ellenőrzött ZIP-et csatolni kell, majd közzétenni. Az új aktuális honlaplink és az önfrissítő csak az ellenőrzött, ténylegesen elérhető kiadás után vált át."
+
+          echo 'PASS: R15.3 draft ready; website release unchanged.'
